@@ -1,0 +1,51 @@
+<html>
+<head>
+</head>
+
+<script type="application/javascript">
+
+function load() {
+    if ("serviceWorker" in navigator) {
+        navigator.serviceWorker
+            .register("./worker.js")
+            .then((registration) => {
+                let serviceWorker;
+                if (registration.installing) {
+                    serviceWorker = registration.installing;
+                    document.querySelector("#kind").textContent = "installing";
+                } else if (registration.waiting) {
+                    serviceWorker = registration.waiting;
+                    document.querySelector("#kind").textContent = "waiting";
+                } else if (registration.active) {
+                    serviceWorker = registration.active;
+                    document.querySelector("#kind").textContent = "active";
+                }
+                if (serviceWorker) {
+                    console.log("Service worker state = " + serviceWorker.state);
+                    serviceWorker.addEventListener("statechange", (e) => {
+                        console.log("Service worker state change = " + e.target.state);
+                        document.querySelector("#kind").textContent = e.target.state;
+                    });
+                }
+            })
+            .catch((error) => {
+                // Something went wrong during registration. The service-worker.js file
+                // might be unavailable or contain a syntax error.
+                console.log("Service worker registration failed: " + error);
+                document.querySelector("#kind").textContent = "registration failed";
+            });
+    } else {
+        // The current browser doesn't support service workers.
+        // Perhaps it is too old or we are not in a Secure Context.
+        console.log("Service worker not supported");
+        document.querySelector("#kind").textContent = "not supported";
+    }
+}
+
+</script>
+
+<body style="background-color:white" onload="load()">
+  <p style="font-weight: 600;">Service worker test</p><br />
+  <p>Service worker: <strong id="kind"></strong></p>
+</body>
+</html>
