@@ -3,13 +3,12 @@
 </head>
 
 <script type="application/javascript">
-
+var  serviceWorker;
 function load() {
     if ("serviceWorker" in navigator) {
         navigator.serviceWorker
-            .register("./worker.js")
+            .register("./worker.js", {scope: './',})
             .then((registration) => {
-                let serviceWorker;
                 if (registration.installing) {
                     serviceWorker = registration.installing;
                     document.querySelector("#kind").textContent = "installing";
@@ -19,6 +18,14 @@ function load() {
                 } else if (registration.active) {
                     serviceWorker = registration.active;
                     document.querySelector("#kind").textContent = "active";
+
+                    console.log("Set timer to send periodic message to service worker");
+                    setInterval(function () {
+                        console.log("Send message...");
+                        serviceWorker.postMessage(
+                                "Periodic test message send to service worker",
+                                );
+                    }, 3000);
                 }
                 if (serviceWorker) {
                     console.log("Service worker state = " + serviceWorker.state);

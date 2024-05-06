@@ -40,3 +40,8 @@ self.addEventListener('activate', function(e) {
   // `onfetch` or `onmessage` event listeners.
   console.log('Activate event:', e);
 });
+
+self.addEventListener("message", (event) => {
+  console.log(`Message received in service worker: ${event.data}`);
+});
+
