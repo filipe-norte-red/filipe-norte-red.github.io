@@ -3,7 +3,25 @@
 </head>
 
 <script type="application/javascript">
-var  serviceWorker;
+var serviceWorker;
+var timerID = 0;
+
+function setTimer(on) {
+   if (on && (timerID == 0)) {
+       console.log("Enable timer to send periodic message to service worker");
+       timerID = setInterval(function () {
+               console.log("Send message...");
+               serviceWorker.postMessage(
+                       "Periodic test message send to service worker",
+                       );
+               }, 3000);
+   } else if (!on && (timerID != 0)) {
+       console.log("Disable timer to send periodic message to service worker");
+       clearInterval(timerID);
+       timerID = 0;
+   }
+}
+
 function load() {
     if ("serviceWorker" in navigator) {
         navigator.serviceWorker
@@ -18,20 +36,14 @@ function load() {
                 } else if (registration.active) {
                     serviceWorker = registration.active;
                     document.querySelector("#kind").textContent = "active";
-
-                    console.log("Set timer to send periodic message to service worker");
-                    setInterval(function () {
-                        console.log("Send message...");
-                        serviceWorker.postMessage(
-                                "Periodic test message send to service worker",
-                                );
-                    }, 3000);
+                    setTimer(true);
                 }
                 if (serviceWorker) {
                     console.log("Service worker state = " + serviceWorker.state);
                     serviceWorker.addEventListener("statechange", (e) => {
                         console.log("Service worker state change = " + e.target.state);
                         document.querySelector("#kind").textContent = e.target.state;
+                        setTimer(e.target.state == "activated");
                     });
                 }
             })
