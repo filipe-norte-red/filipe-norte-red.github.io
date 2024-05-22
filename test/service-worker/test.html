@@ -5,16 +5,17 @@
 <script type="application/javascript">
 var serviceWorker;
 var timerID = 0;
+var counter = 0;
 
 function setTimer(on) {
    if (on && (timerID == 0)) {
        console.log("Enable timer to send periodic message to service worker");
+       document.querySelector("#counter").textContent = counter;
        timerID = setInterval(function () {
-               console.log("Send message...");
-               serviceWorker.postMessage(
-                       "Periodic test message send to service worker",
-                       );
-               }, 3000);
+                     console.log("Send message...");
+                     serviceWorker.postMessage("Periodic test message send to service worker");
+                     document.querySelector("#counter").textContent = ++counter;
+                 }, 3000);
    } else if (!on && (timerID != 0)) {
        console.log("Disable timer to send periodic message to service worker");
        clearInterval(timerID);
@@ -66,5 +67,6 @@ function load() {
 <body style="background-color:white" onload="load()">
   <p style="font-weight: 600;">Service worker test</p><br />
   <p>Service worker: <strong id="kind"></strong></p>
+  <p># sent messages: <strong id="counter"></strong></p>
 </body>
 </html>
