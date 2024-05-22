@@ -1,0 +1,45 @@
+@supports(font-variation-settings: normal){
+  body {
+  font-family: zagma-vf;
+  }
+}
+body{
+font-family: zagma;
+}
+p {
+  margin-top: 100px;
+  margin-left: 100px;
+  font-style: normal;
+  font-size:4rem;
+
+}
+
+@font-face {
+        font-family: zagma;
+        font-style: normal;
+        font-weight: 400;
+        src: url(https://app.10ft.itv.com/itvstatic/assets/fonts/zagma/F37Zagma-Regular.woff2) format("woff2"),url(https://app.10ft.itv.com/itvstatic/assets/fonts/zagma/F37Zagma-Regular.woff) format("woff")
+    }
+    @font-face {
+        font-family: zagma;
+        font-style: italic;
+        font-weight: 400;
+        src: url(https://app.10ft.itv.com/itvstatic/assets/fonts/zagma/F37Zagma-RegularItalic.woff2) format("woff2"),url(https://app.10ft.itv.com/itvstatic/assets/fonts/zagma/F37Zagma-RegularItalic.woff) format("woff")
+    }
+    @font-face {
+        font-family: zagma;
+        font-style: normal;
+        font-weight: 700;
+        src: url(https://app.10ft.itv.com/itvstatic/assets/fonts/zagma/F37Zagma-Bold.woff2) format("woff2"),url(https://app.10ft.itv.com/itvstatic/assets/fonts/zagma/F37Zagma-Bold.woff) format("woff")
+    }
+    @font-face {
+        font-family: zagma;
+        font-style: italic;
+        font-weight: 700;
+        src: url(https://app.10ft.itv.com/itvstatic/assets/fonts/zagma/F37Zagma-BoldItalic.woff2) format("woff2"),url(https://app.10ft.itv.com/itvstatic/assets/fonts/zagma/F37Zagma-BoldItalic.woff) format("woff")
+    }
+    @font-face {
+        font-family: zagma-vf;
+        font-weight: 1 999;
+        src: url(https://app.10ft.itv.com/itvstatic/assets/fonts/zagma/F37Zagma-VF.woff2) format("woff2")
+    }
