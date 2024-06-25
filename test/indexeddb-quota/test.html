@@ -1,0 +1,93 @@
+<html>
+<head>
+</head>
+
+<script type="application/javascript">
+
+var counter=0;
+var limit=300;
+var timeOut=10;
+var dataSize = 100*1024;
+var db;
+
+function writeDataEntry() {
+    if (counter < limit) {
+        counter++;
+
+        let i = counter;
+
+        console.log(`Writing data entry ${i}`);
+
+        transaction = db.transaction("TestData", "readwrite");
+
+        transaction.oncomplete = (event) => {
+            console.log("Transaction complete");
+        };
+
+        transaction.onerror = (event) => {
+        };
+
+        store = transaction.objectStore("TestData");
+
+        entry = `${new Array(10000).join('a')}`
+        testData = {"key": counter, "data" : entry}
+
+        const request = store.add(testData);
+
+        document.querySelector("#kind").textContent = "Written " + counter + " items";
+
+        try {
+            setTimeout(writeDataEntry, timeOut);
+        } catch (error) {
+            console.log("Unable to write data entries after" + (counter * dataSize) + " bytes");
+            
+            document.querySelector("#kind").textContent = "Error after " + counter + " items";
+
+            counter = limit;
+
+            console.log("Closing database");
+            db.close();
+        }
+    } else {
+        console.log("Closing database");
+        db.close();
+    }
+}
+
+function load() {
+
+    if (!window.indexedDB) {
+        console.log("ERROR: IndexedDB not supported");
+        document.querySelector("#kind").textContent = "not supported";
+        return;
+    }
+
+    const request = window.indexedDB.open("MyTestDatabase");
+
+    request.onupgradeneeded = (event) => {
+        console.log("Database upgrade needed");
+
+        const db = event.target.result;
+        const objectStore = db.createObjectStore("TestData", { keyPath: "key" });
+    };
+
+    request.onerror = (event) => {
+        console.log("Database error: ${event.target.errorCode}`");
+    };
+
+    request.onsuccess = (event) => {
+        db = event.target.result;
+
+        console.log("Database opened");
+
+        setTimeout(() => {writeDataEntry();},1000);
+    }
+}
+
+</script>
+
+<body style="background-color:white" onload="load()">
+  <p style="font-weight: 600;">IndexedDB test</p><br />
+  <p>IndexedDB: <strong id="kind"></strong></p>
+</body>
+</html>
