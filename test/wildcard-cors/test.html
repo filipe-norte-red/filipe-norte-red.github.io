@@ -1,0 +1,43 @@
+<html>
+<head>
+</head>
+
+<script type="application/javascript">
+
+function handleError(e) {
+    document.querySelector("#status").textContent = "FAILED";
+}
+
+function handleLoaded(e) {
+  if (e.loaded > 0) {
+      document.querySelector("#status").textContent = "SUCCESS";
+  }
+}
+
+function addListeners(xhr) {
+  xhr.addEventListener("loadend", handleLoaded);
+  xhr.addEventListener("error", handleError);
+}
+
+function test() {
+    const xhr = new XMLHttpRequest();
+
+    addListeners(xhr);
+
+    xhr.open("GET", "http://192.168.1.75:8000/wildcard-cors/redirect.php", true);
+    //xhr.open("GET", "http://192.168.1.75:8000/wildcard-cors/test.html", true);
+    //xhr.open("GET", "https://ste.hbbtvtest.org/_TESTSUITE/RES/CONTRIBUTORS/RT-RK/on_ste_hbbtvtest_org/v1/http_redirect.php?cnt=1&end=10&nextLocation=https-to-http&landingPage=JSON&statusCode=301", true);
+    xhr.send(null); 
+}
+
+function load() {
+    setTimeout(() => {test();},1000);
+}
+
+</script>
+
+<body style="background-color:white" onload="load()">
+  <p style="font-weight: 600;">Wildcard CORS</p><br />
+  <p>Status: <strong id="status">Fetching redirect page</strong></p>
+</body>
+</html>
