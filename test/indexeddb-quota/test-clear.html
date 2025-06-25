@@ -5,9 +5,9 @@
 
 <script type="application/javascript">
 
-    var dataSize = 10*1024;
+    var dataSize = 10 * 1024;
     var writeLimitSpaceAvailable = 100;
-    var writeLimitSpaceUnavailable = 700;
+    var writeLimitSpaceUnavailable = 1300;
     var db;
 
     async function writeData(key) {
@@ -181,7 +181,7 @@
             document.querySelector("#output").textContent = "not supported";
             return;
         }
-        process();
+        setTimeout(() => { process() },50);
     }
 
 </script>
@@ -189,7 +189,7 @@
 <body style="background-color:white" onload="load()">
     <p style="font-weight: 600;">IndexedDB clear test</p><br />
     <p style="font-weight: 600;">This test may take up to 30 seconds. Wait for a result to be displayed</p><br />
-    <p style="font-weight: 600;">IMPORTANT: Quota for IndexedDB shall configured between 2MB and 6MB</p><br />
+    <p style="font-weight: 600;">IMPORTANT: Partition size shall be around 10MB</p><br />
     <p>Count at init: <strong id="output-init"></strong></p>
     <p>Count before write (within available space): <strong id="output-before-write"></strong></p>
     <p>Count before clear (within available space): <strong id="output-before-clear"></strong></p>
