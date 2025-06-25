@@ -1,0 +1,202 @@
+<html>
+
+<head>
+</head>
+
+<script type="application/javascript">
+
+    var dataSize = 10*1024;
+    var writeLimitSpaceAvailable = 100;
+    var writeLimitSpaceUnavailable = 700;
+    var db;
+
+    async function writeData(key) {
+        return new Promise((resolve, reject) => {
+            transaction = db.transaction("TestData", "readwrite");
+
+            store = transaction.objectStore("TestData");
+
+            entry = `${new Array(dataSize).join('a')}`
+            testData = { "key": key, "data": entry }
+
+            const request = store.add(testData);
+
+            request.onsuccess = () => {
+                console.log('Write data SUCCESS: ' + request.result);
+                resolve();
+            };
+            request.onerror = (event) => {
+                console.log('Write data ERROR: ' + event.target.error);
+                reject(event.target.error);
+            };
+        });
+    }
+    async function writeBatch(limit) {
+        return new Promise((resolve, reject) => {
+            var writeCount = 0
+            for (var i = 0; i < limit; i++) {
+                writeData(i).then(() => {
+                    writeCount++;
+                    if (writeCount == limit) {
+                        resolve();
+                    }
+                }).catch((err) => {
+                    reject(err)
+                });
+            }
+        })
+    }
+
+    async function readCount() {
+        return new Promise((resolve, reject) => {
+            transaction = db.transaction("TestData", "readwrite");
+
+            store = transaction.objectStore("TestData");
+
+            const request = store.count();
+            request.onsuccess = () => {
+                console.log('Read item count SUCCESS: ' + request.result);
+                resolve(request.result);
+            };
+            request.onerror = (event) => {
+                console.log('Read item count ERROR: ' + event.target.error);
+                reject(event.target.error);
+            };
+        });
+    }
+
+    async function clearStore() {
+        return new Promise((resolve, reject) => {
+            transaction = db.transaction("TestData", "readwrite");
+
+            store = transaction.objectStore("TestData");
+
+            const request = store.clear();
+            request.onsuccess = () => {
+                console.log('Clear store SUCCESS');
+                resolve();
+            };
+            request.onerror = (event) => {
+                console.log('Clear store ERROR: ' + event.target.error);
+                reject(event.target.error);
+            };
+        });
+    }
+
+    async function openDatabase() {
+        return new Promise((resolve, reject) => {
+            const request = window.indexedDB.open("MyTestDatabase");
+
+            request.onupgradeneeded = (event) => {
+                console.log("Database upgrade needed");
+
+                const db = event.target.result;
+                const objectStore = db.createObjectStore("TestData", { keyPath: "key" });
+            };
+
+            request.onerror = (event) => {
+                console.log("Database error: " + event.target.error);
+                reject(event.target.error);
+            };
+
+            request.onsuccess = (event) => {
+                db = event.target.result;
+
+                console.log("Database opened");
+
+                resolve();
+            }
+        });
+    }
+
+    async function process() {
+        try {
+            await openDatabase();
+
+            // Initial store setup to well defined empty state
+            const count_init = await readCount();
+            document.querySelector("#output-init").textContent = count_init;
+
+            if (count_init > 0) {
+                await clearStore();
+
+                const count_before_write = await readCount();
+                document.querySelector("#output-before-write").textContent = count_before_write;
+
+                if (count_before_write !== 0) {
+                    throw new Error("Store contents were not cleared");
+                }
+            } else {
+                document.querySelector("#output-before-write").textContent = count_init;
+            }
+
+            // First store write and clear cycle (within store capacity)
+            writeBatch(writeLimitSpaceAvailable)
+
+            const count_before_clear = await readCount();
+            document.querySelector("#output-before-clear").textContent = count_before_clear;
+
+            await clearStore();
+
+            const count_after_clear = await readCount();
+            document.querySelector("#output-after-clear").textContent = count_after_clear;
+
+            if (count_after_clear !== 0) {
+                throw new Error("Unable to clear store after write within available space");
+            }
+            if (count_before_clear !== writeLimitSpaceAvailable) {
+                throw new Error("Unable to write all items within available space");
+            }
+
+            // Second store write and clear cycle (outside of store capacity)
+            writeBatch(writeLimitSpaceUnavailable)
+
+            const count_before_clear_outside = await readCount();
+            document.querySelector("#output-before-clear-outside").textContent = count_before_clear_outside;
+
+            await clearStore();
+
+            const count_after_clear_outside = await readCount();
+            document.querySelector("#output-after-clear-outside").textContent = count_after_clear_outside;
+
+            if (count_after_clear_outside !== 0) {
+                throw new Error("Unable to clear store after write beyond available space");
+            }
+
+            document.querySelector("#result").textContent = "PASS";
+
+        } catch (err) {
+            console.log("ERROR: " + err.message)
+            document.querySelector("#result").textContent = "FAIL - " + err;
+        } finally {
+            console.log("Close Database");
+            db.close();
+        }
+    }
+
+    function load() {
+
+        if (!window.indexedDB) {
+            console.log("ERROR: IndexedDB not supported");
+            document.querySelector("#output").textContent = "not supported";
+            return;
+        }
+        process();
+    }
+
+</script>
+
+<body style="background-color:white" onload="load()">
+    <p style="font-weight: 600;">IndexedDB clear test</p><br />
+    <p style="font-weight: 600;">This test may take up to 30 seconds. Wait for a result to be displayed</p><br />
+    <p style="font-weight: 600;">IMPORTANT: Quota for IndexedDB shall configured between 2MB and 6MB</p><br />
+    <p>Count at init: <strong id="output-init"></strong></p>
+    <p>Count before write (within available space): <strong id="output-before-write"></strong></p>
+    <p>Count before clear (within available space): <strong id="output-before-clear"></strong></p>
+    <p>Count after clear (within available space): <strong id="output-after-clear"></strong></p>
+    <p>Count before clear (outside available space): <strong id="output-before-clear-outside"></strong></p>
+    <p>Count after clear (outside available space): <strong id="output-after-clear-outside"></strong></p>
+    <p>Result: <strong id="result"></strong></p>
+</body>
+
+</html>
